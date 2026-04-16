@@ -52,6 +52,41 @@ You should see the command line print the raw logs that shows the agents in acti
 agbench tabulate Results/gaia_validation_level_1__MagenticOne/
 ```
 
+### Running with Live Progress Dashboard
+
+To run with a Rich live terminal dashboard (progress bar, ETA, active instances, token/cost stats), use the `run_with_progress.py` wrapper:
+
+```bash
+# Generic usage
+/path/to/.venv/bin/python3 Scripts/run_with_progress.py <TASKS_FILE.jsonl> \
+    -r <REPEAT> \
+    -p <PARALLEL> \
+    --refresh-seconds 0.5 \
+    --log-tail-lines 6
+
+# Example: 40-task subset, 3 repeats, 1 parallel worker
+/home/atemin/autogen/.venv/bin/python3 Scripts/run_with_progress.py \
+    Tasks/gaia_validation_subset40__MagenticOne.jsonl \
+    -r 3 -p 1 \
+    --refresh-seconds 0.5 \
+    --log-tail-lines 6
+```
+
+To see all available options:
+
+```bash
+/home/atemin/autogen/.venv/bin/python3 Scripts/run_with_progress.py --help
+```
+
+After the run completes, tabulate results with cost and CAI metrics:
+
+```bash
+/home/atemin/autogen/.venv/bin/python3 Scripts/custom_tabulate.py \
+    Results/<RUN_FOLDER>/ \
+    --prompt-cost-per-1m 0.20 \
+    --completion-cost-per-1m 0.80
+```
+
 ## References
 
 **GAIA: a benchmark for General AI Assistants** `<br/>`

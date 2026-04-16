@@ -47,6 +47,7 @@ except ImportError:
     sys.exit(1)
 
 COMPLETED_MARKER = "SCENARIO.PY COMPLETE !#!#"
+RUNNING_SCENARIO_RE = re.compile(r"Running scenario .*?/([0-9a-f\-]{36})/(\d+)")
 
 
 @dataclass
@@ -56,6 +57,10 @@ class RunSnapshot:
     running_instances: int
     total_tokens: int
     success_markers: int
+    discovered_instances: int
+    running_details: list[tuple[str, float, int]]
+    completed_keys: set[str]
+    all_keys: set[str]
 
 
 def count_jsonl_lines(path: Path) -> int:
@@ -111,28 +116,41 @@ def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
     total_tokens = 0
     success_markers = 0
     completed_by_task: dict[str, int] = defaultdict(int)
+    running_details: list[tuple[str, float, int]] = []
+    completed_keys: set[str] = set()
+    all_keys: set[str] = set()
 
     for instance_dir in find_instance_dirs(results_root):
         task_id = instance_dir.parent.name
+        instance_key = f"{task_id}/{instance_dir.name}"
+        all_keys.add(instance_key)
         console_file = instance_dir / "console_log.txt"
         if not console_file.exists():
             running_instances += 1
+            running_details.append((instance_key, time.time(), 0))
             continue
 
         try:
             text = console_file.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             running_instances += 1
+            running_details.append((instance_key, time.time(), 0))
             continue
+
+        stat = console_file.stat()
+        mtime = stat.st_mtime
+        size = int(stat.st_size)
 
         if COMPLETED_MARKER in text:
             completed_instances += 1
             completed_by_task[task_id] += 1
             total_tokens += read_total_tokens(instance_dir)
+            completed_keys.add(instance_key)
             if "ALL TESTS PASSED !#!#" in text:
                 success_markers += 1
         else:
             running_instances += 1
+            running_details.append((instance_key, mtime, size))
 
     completed_tasks = sum(1 for n in completed_by_task.values() if n >= max(1, repeat))
 
@@ -142,6 +160,10 @@ def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
         running_instances=running_instances,
         total_tokens=total_tokens,
         success_markers=success_markers,
+        discovered_instances=len(all_keys),
+        running_details=running_details,
+        completed_keys=completed_keys,
+        all_keys=all_keys,
     )
 
 
@@ -222,6 +244,16 @@ def main() -> int:
     cmd = build_agbench_command(args)
     console = Console()
     output_lines: deque[str] = deque(maxlen=max(1, args.log_tail_lines))
+    output_lock = threading.Lock()
+
+    # Runtime signal tracking
+    instance_start_ts: dict[str, float] = {}
+    completed_duration_s: list[float] = []
+    lines_seen = 0
+    lines_seen_last = 0
+    last_line_ts = time.time()
+    last_progress_event = "runner started"
+    last_progress_event_ts = time.time()
 
     proc = subprocess.Popen(
         cmd,
@@ -232,10 +264,23 @@ def main() -> int:
     )
 
     def pump_stdout() -> None:
+        nonlocal lines_seen, last_line_ts, last_progress_event, last_progress_event_ts
         if proc.stdout is None:
             return
         for line in proc.stdout:
-            output_lines.append(line.rstrip("\n"))
+            raw = line.rstrip("\n")
+            now = time.time()
+            with output_lock:
+                output_lines.append(raw)
+                lines_seen += 1
+                last_line_ts = now
+
+            m = RUNNING_SCENARIO_RE.search(raw)
+            if m:
+                key = f"{m.group(1)}/{m.group(2)}"
+                instance_start_ts.setdefault(key, now)
+                last_progress_event = f"started {key}"
+                last_progress_event_ts = now
 
     reader = threading.Thread(target=pump_stdout, daemon=True)
     reader.start()
@@ -254,83 +299,161 @@ def main() -> int:
     )
     task_id = progress.add_task("GAIA Eval (Tasks)", total=max(1, expected_task_total), completed=0)
 
-    with Live(refresh_per_second=max(1, int(1.0 / max(0.2, args.refresh_seconds))), console=console, transient=False) as live:
-        while True:
-            snap = snapshot_results(results_root, int(args.repeat))
-            elapsed = time.time() - start_time
+    refresh = max(0.2, args.refresh_seconds)
 
-            completed_tasks = min(snap.completed_tasks, expected_task_total)
-            progress.update(task_id, completed=completed_tasks)
-
-            task_throughput = (completed_tasks / elapsed) * 3600.0 if elapsed > 0 else 0.0
-            instance_throughput = (snap.completed_instances / elapsed) * 3600.0 if elapsed > 0 else 0.0
-            avg_tokens_per_instance = (
-                snap.total_tokens / snap.completed_instances if snap.completed_instances > 0 else 0.0
-            )
-            avg_tokens_per_task = (snap.total_tokens / completed_tasks) if completed_tasks > 0 else 0.0
-            eta = (
-                ((expected_task_total - completed_tasks) / (completed_tasks / elapsed))
-                if completed_tasks > 0 and expected_task_total > completed_tasks
-                else None
-            )
-
-            stats = Table.grid(expand=True)
-            stats.add_column(justify="left")
-            stats.add_column(justify="right")
-            stats.add_row("Scenario", scenario_stem)
-            stats.add_row("Expected Tasks", str(expected_task_total))
-            stats.add_row("Expected Instances", str(expected_instance_total))
-            stats.add_row("Completed Tasks", str(completed_tasks))
-            stats.add_row("Completed Instances", str(snap.completed_instances))
-            stats.add_row("Running Instances", str(snap.running_instances))
-            stats.add_row("Success Markers", str(snap.success_markers))
-            stats.add_row("Elapsed", format_seconds(elapsed))
-            stats.add_row("ETA", format_seconds(eta))
-            stats.add_row("Task Throughput", f"{task_throughput:.2f} tasks/hour")
-            stats.add_row("Instance Throughput", f"{instance_throughput:.2f} instances/hour")
-            stats.add_row("Total Tokens", f"{snap.total_tokens:,}")
-            stats.add_row("Avg Tokens/Completed Task", f"{avg_tokens_per_task:,.1f}")
-            stats.add_row("Avg Tokens/Completed Instance", f"{avg_tokens_per_instance:,.1f}")
-
-            logs = "\n".join(output_lines) if output_lines else "(waiting for output...)"
-            layout = Table.grid(expand=True)
-            layout.add_row(Panel(progress, title="Progress", border_style="cyan"))
-            layout.add_row(Panel(stats, title="Run Stats", border_style="green"))
-            layout.add_row(Panel(logs, title="Live Log Tail", border_style="magenta"))
-            live.update(layout)
-
-            if proc.poll() is not None:
-                # Final refresh after process exits.
+    with Live(refresh_per_second=max(1, int(1.0 / refresh)), console=console, transient=False) as live:
+        try:
+            while True:
                 snap = snapshot_results(results_root, int(args.repeat))
+                now = time.time()
+                elapsed = now - start_time
+
+                # Backfill instance start times for discovered instances.
+                for k in snap.all_keys:
+                    instance_start_ts.setdefault(k, now)
+
+                # Harvest durations for instances that completed this tick.
+                for k in snap.completed_keys:
+                    if k in instance_start_ts:
+                        dur = max(0.0, now - instance_start_ts[k])
+                        # Avoid re-appending same completion.
+                        if not completed_duration_s or abs(completed_duration_s[-1] - dur) > 1e-9:
+                            pass
+                # Use a set to avoid duplicate duration append across ticks.
+                if not hasattr(main, "_completed_seen"):
+                    setattr(main, "_completed_seen", set())
+                completed_seen: set[str] = getattr(main, "_completed_seen")
+                new_completed = snap.completed_keys - completed_seen
+                for k in new_completed:
+                    started = instance_start_ts.get(k, now)
+                    completed_duration_s.append(max(0.0, now - started))
+                    last_progress_event = f"completed {k}"
+                    last_progress_event_ts = now
+                completed_seen.update(new_completed)
+
                 completed_tasks = min(snap.completed_tasks, expected_task_total)
                 progress.update(task_id, completed=completed_tasks)
-                elapsed = time.time() - start_time
+
                 task_throughput = (completed_tasks / elapsed) * 3600.0 if elapsed > 0 else 0.0
-                avg_tokens_per_task = (snap.total_tokens / completed_tasks) if completed_tasks > 0 else 0.0
+                instance_throughput = (snap.completed_instances / elapsed) * 3600.0 if elapsed > 0 else 0.0
                 avg_tokens_per_instance = (
                     snap.total_tokens / snap.completed_instances if snap.completed_instances > 0 else 0.0
                 )
+                avg_tokens_per_task = (snap.total_tokens / completed_tasks) if completed_tasks > 0 else 0.0
 
-                final_stats = Table.grid(expand=True)
-                final_stats.add_column(justify="left")
-                final_stats.add_column(justify="right")
-                final_stats.add_row("Exit Code", str(proc.returncode))
-                final_stats.add_row("Completed Tasks", f"{completed_tasks}/{expected_task_total}")
-                final_stats.add_row("Completed Instances", f"{snap.completed_instances}/{expected_instance_total}")
-                final_stats.add_row("Elapsed", format_seconds(elapsed))
-                final_stats.add_row("Task Throughput", f"{task_throughput:.2f} tasks/hour")
-                final_stats.add_row("Total Tokens", f"{snap.total_tokens:,}")
-                final_stats.add_row("Avg Tokens/Completed Task", f"{avg_tokens_per_task:,.1f}")
-                final_stats.add_row("Avg Tokens/Completed Instance", f"{avg_tokens_per_instance:,.1f}")
+                # More informative ETA:
+                # 1) If we have completed instances, use observed instance rate.
+                # 2) Otherwise bootstrap from running-instance age.
+                remaining_instances = max(0, expected_instance_total - snap.completed_instances)
+                eta_instances = None
+                if snap.completed_instances > 0 and elapsed > 0:
+                    inst_rate = snap.completed_instances / elapsed
+                    if inst_rate > 0:
+                        eta_instances = remaining_instances / inst_rate
+                elif snap.running_instances > 0:
+                    ages = []
+                    for key, _mtime, _size in snap.running_details:
+                        started = instance_start_ts.get(key, start_time)
+                        ages.append(max(1.0, now - started))
+                    avg_running_age = (sum(ages) / len(ages)) if ages else elapsed
+                    # Conservative bootstrap: completion tends to be after current age.
+                    bootstrap_instance_duration = max(180.0, avg_running_age * 1.6)
+                    eta_instances = (remaining_instances / max(1, snap.running_instances)) * bootstrap_instance_duration
 
-                final_layout = Table.grid(expand=True)
-                final_layout.add_row(Panel(progress, title="Progress", border_style="cyan"))
-                final_layout.add_row(Panel(final_stats, title="Final Summary", border_style="green"))
-                final_layout.add_row(Panel("\n".join(output_lines) if output_lines else "(no output)", title="Final Log Tail", border_style="magenta"))
-                live.update(final_layout)
-                break
+                eta_tasks = (eta_instances / max(1, int(args.repeat))) if eta_instances is not None else None
 
-            time.sleep(max(0.2, args.refresh_seconds))
+                with output_lock:
+                    logs = "\n".join(output_lines) if output_lines else "(waiting for output...)"
+                    line_rate = (lines_seen - lines_seen_last) / refresh
+                    lines_seen_last = lines_seen
+
+                # Active instances table.
+                active = Table(show_header=True, header_style="bold", expand=True)
+                active.add_column("Instance", overflow="fold")
+                active.add_column("Elapsed", justify="right")
+                active.add_column("Last Log Update", justify="right")
+                active.add_column("Log Size", justify="right")
+                for key, mtime, size in sorted(snap.running_details, key=lambda x: x[1], reverse=True)[:8]:
+                    started = instance_start_ts.get(key, start_time)
+                    active.add_row(
+                        key,
+                        format_seconds(now - started),
+                        f"{int(now - mtime)}s ago",
+                        f"{size/1024:.1f} KB",
+                    )
+                if snap.running_instances == 0:
+                    active.add_row("(none)", "--", "--", "--")
+
+                stats = Table.grid(expand=True)
+                stats.add_column(justify="left")
+                stats.add_column(justify="right")
+                stats.add_row("Scenario", scenario_stem)
+                stats.add_row("Expected Tasks", str(expected_task_total))
+                stats.add_row("Expected Instances", str(expected_instance_total))
+                stats.add_row("Discovered Instances", str(snap.discovered_instances))
+                stats.add_row("Completed Tasks", str(completed_tasks))
+                stats.add_row("Completed Instances", str(snap.completed_instances))
+                stats.add_row("Running Instances", str(snap.running_instances))
+                stats.add_row("Success Markers", str(snap.success_markers))
+                stats.add_row("Elapsed", format_seconds(elapsed))
+                stats.add_row("ETA (Tasks)", format_seconds(eta_tasks))
+                stats.add_row("ETA (Instances)", format_seconds(eta_instances))
+                stats.add_row("Task Throughput", f"{task_throughput:.2f} tasks/hour")
+                stats.add_row("Instance Throughput", f"{instance_throughput:.2f} instances/hour")
+                stats.add_row("Log Line Rate", f"{line_rate:.2f} lines/s")
+                stats.add_row("Last Log Line", f"{int(now - last_line_ts)}s ago")
+                stats.add_row("Last Progress Event", f"{last_progress_event} ({int(now - last_progress_event_ts)}s ago)")
+                stats.add_row("Total Tokens", f"{snap.total_tokens:,}")
+                stats.add_row("Avg Tokens/Completed Task", f"{avg_tokens_per_task:,.1f}")
+                stats.add_row("Avg Tokens/Completed Instance", f"{avg_tokens_per_instance:,.1f}")
+
+                layout = Table.grid(expand=True)
+                layout.add_row(Panel(progress, title="Progress", border_style="cyan"))
+                layout.add_row(Panel(stats, title="Run Stats", border_style="green"))
+                layout.add_row(Panel(active, title="Active Instances", border_style="yellow"))
+                layout.add_row(Panel(logs, title="Live Log Tail", border_style="magenta"))
+                live.update(layout)
+
+                if proc.poll() is not None:
+                    # Final refresh after process exits.
+                    snap = snapshot_results(results_root, int(args.repeat))
+                    completed_tasks = min(snap.completed_tasks, expected_task_total)
+                    progress.update(task_id, completed=completed_tasks)
+                    elapsed = time.time() - start_time
+                    task_throughput = (completed_tasks / elapsed) * 3600.0 if elapsed > 0 else 0.0
+                    avg_tokens_per_task = (snap.total_tokens / completed_tasks) if completed_tasks > 0 else 0.0
+                    avg_tokens_per_instance = (
+                        snap.total_tokens / snap.completed_instances if snap.completed_instances > 0 else 0.0
+                    )
+
+                    final_stats = Table.grid(expand=True)
+                    final_stats.add_column(justify="left")
+                    final_stats.add_column(justify="right")
+                    final_stats.add_row("Exit Code", str(proc.returncode))
+                    final_stats.add_row("Completed Tasks", f"{completed_tasks}/{expected_task_total}")
+                    final_stats.add_row("Completed Instances", f"{snap.completed_instances}/{expected_instance_total}")
+                    final_stats.add_row("Elapsed", format_seconds(elapsed))
+                    final_stats.add_row("Task Throughput", f"{task_throughput:.2f} tasks/hour")
+                    final_stats.add_row("Total Tokens", f"{snap.total_tokens:,}")
+                    final_stats.add_row("Avg Tokens/Completed Task", f"{avg_tokens_per_task:,.1f}")
+                    final_stats.add_row("Avg Tokens/Completed Instance", f"{avg_tokens_per_instance:,.1f}")
+
+                    final_layout = Table.grid(expand=True)
+                    final_layout.add_row(Panel(progress, title="Progress", border_style="cyan"))
+                    final_layout.add_row(Panel(final_stats, title="Final Summary", border_style="green"))
+                    final_layout.add_row(Panel("\n".join(output_lines) if output_lines else "(no output)", title="Final Log Tail", border_style="magenta"))
+                    live.update(final_layout)
+                    break
+
+                time.sleep(refresh)
+        except KeyboardInterrupt:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                proc.kill()
+            console.print("\n[bold yellow]Interrupted by user.[/bold yellow]")
+            return 130
 
     reader.join(timeout=1.0)
     return int(proc.returncode or 0)
