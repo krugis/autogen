@@ -70,6 +70,14 @@ To run with a Rich live terminal dashboard (progress bar, ETA, active instances,
     -r 3 -p 1 \
     --refresh-seconds 0.5 \
     --log-tail-lines 6
+
+# Quick sanity check: 10-task subset, 1 repeat, 2 parallel (~55 min)
+# Note: agbench does not support -p and -s together; use a pre-sliced task file instead.
+/home/atemin/autogen/.venv/bin/python3 Scripts/run_with_progress.py \
+    Tasks/gaia_validation_subset10__MagenticOne.jsonl \
+    -r 1 -p 2 \
+    --refresh-seconds 0.5 \
+    --log-tail-lines 6
 ```
 
 To see all available options:

@@ -110,7 +110,12 @@ def read_total_tokens(instance_dir: Path) -> int:
     return 0
 
 
-def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
+def snapshot_results(
+    results_root: Path,
+    repeat: int,
+    run_start_time: float = 0.0,
+    stream_tokens: int = 0,
+) -> RunSnapshot:
     completed_instances = 0
     running_instances = 0
     total_tokens = 0
@@ -119,20 +124,15 @@ def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
     running_details: list[tuple[str, float, int]] = []
     completed_keys: set[str] = set()
     all_keys: set[str] = set()
+    has_metrics_tokens = False
 
     for instance_dir in find_instance_dirs(results_root):
         task_id = instance_dir.parent.name
         instance_key = f"{task_id}/{instance_dir.name}"
-        all_keys.add(instance_key)
         console_file = instance_dir / "console_log.txt"
-        if not console_file.exists():
-            running_instances += 1
-            running_details.append((instance_key, time.time(), 0))
-            continue
 
-        try:
-            text = console_file.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
+        if not console_file.exists():
+            all_keys.add(instance_key)
             running_instances += 1
             running_details.append((instance_key, time.time(), 0))
             continue
@@ -141,10 +141,27 @@ def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
         mtime = stat.st_mtime
         size = int(stat.st_size)
 
+        # Skip leftover instance dirs from a previous run.
+        if run_start_time > 0 and mtime < run_start_time - 60:
+            continue
+
+        try:
+            text = console_file.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            all_keys.add(instance_key)
+            running_instances += 1
+            running_details.append((instance_key, time.time(), 0))
+            continue
+
+        all_keys.add(instance_key)
+
         if COMPLETED_MARKER in text:
             completed_instances += 1
             completed_by_task[task_id] += 1
-            total_tokens += read_total_tokens(instance_dir)
+            tok = read_total_tokens(instance_dir)
+            total_tokens += tok
+            if tok > 0:
+                has_metrics_tokens = True
             completed_keys.add(instance_key)
             if "ALL TESTS PASSED !#!#" in text:
                 success_markers += 1
@@ -153,6 +170,10 @@ def snapshot_results(results_root: Path, repeat: int) -> RunSnapshot:
             running_details.append((instance_key, mtime, size))
 
     completed_tasks = sum(1 for n in completed_by_task.values() if n >= max(1, repeat))
+
+    # Use stream token accumulation for running instances when metrics.json not yet available.
+    if not has_metrics_tokens and stream_tokens > 0:
+        total_tokens = stream_tokens
 
     return RunSnapshot(
         completed_instances=completed_instances,
@@ -181,7 +202,8 @@ def build_agbench_command(args: argparse.Namespace) -> list[str]:
 
     if args.repeat is not None:
         cmd += ["-r", str(args.repeat)]
-    if args.subsample is not None:
+    # Only pass -s if explicitly non-default (agbench forbids -s and -p together).
+    if args.subsample is not None and str(args.subsample) not in ("1.0", "1"):
         cmd += ["-s", str(args.subsample)]
     if args.parallel is not None:
         cmd += ["-p", str(args.parallel)]
@@ -254,6 +276,12 @@ def main() -> int:
     last_line_ts = time.time()
     last_progress_event = "runner started"
     last_progress_event_ts = time.time()
+    # Accumulate tokens from stdout stream before metrics.json is written.
+    _stream_prompt_tokens: list[int] = [0]
+    _stream_completion_tokens: list[int] = [0]
+    _stream_tokens_lock = threading.Lock()
+    _STREAM_PROMPT_RE = re.compile(r"PROMPT_TOKENS:\s*(\d+)\s*!#!#")
+    _STREAM_COMPLETION_RE = re.compile(r"COMPLETION_TOKENS:\s*(\d+)\s*!#!#")
 
     proc = subprocess.Popen(
         cmd,
@@ -282,6 +310,16 @@ def main() -> int:
                 last_progress_event = f"started {key}"
                 last_progress_event_ts = now
 
+            mp = _STREAM_PROMPT_RE.search(raw)
+            if mp:
+                with _stream_tokens_lock:
+                    _stream_prompt_tokens[0] += int(mp.group(1))
+
+            mc = _STREAM_COMPLETION_RE.search(raw)
+            if mc:
+                with _stream_tokens_lock:
+                    _stream_completion_tokens[0] += int(mc.group(1))
+
     reader = threading.Thread(target=pump_stdout, daemon=True)
     reader.start()
 
@@ -304,7 +342,9 @@ def main() -> int:
     with Live(refresh_per_second=max(1, int(1.0 / refresh)), console=console, transient=False) as live:
         try:
             while True:
-                snap = snapshot_results(results_root, int(args.repeat))
+                with _stream_tokens_lock:
+                    _stok = _stream_prompt_tokens[0] + _stream_completion_tokens[0]
+                snap = snapshot_results(results_root, int(args.repeat), run_start_time=start_time, stream_tokens=_stok)
                 now = time.time()
                 elapsed = now - start_time
 
@@ -416,7 +456,9 @@ def main() -> int:
 
                 if proc.poll() is not None:
                     # Final refresh after process exits.
-                    snap = snapshot_results(results_root, int(args.repeat))
+                    with _stream_tokens_lock:
+                        _stok = _stream_prompt_tokens[0] + _stream_completion_tokens[0]
+                    snap = snapshot_results(results_root, int(args.repeat), run_start_time=start_time, stream_tokens=_stok)
                     completed_tasks = min(snap.completed_tasks, expected_task_total)
                     progress.update(task_id, completed=completed_tasks)
                     elapsed = time.time() - start_time
