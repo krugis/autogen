@@ -13,6 +13,7 @@ model_config: &client
     model: gemma-4-26B-A4B-APEX-I-Mini.gguf
     base_url: http://localhost:8080/v1/
     api_key: not-needed
+    max_tokens: 2048          # cap per-call completion; keeps prompt headroom in 24k window
     model_info:
       function_calling: true
       json_output: true

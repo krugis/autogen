@@ -97,10 +97,13 @@ async def main() -> None:
         to_save_screenshots=True,
     )
 
+    # max_turns and max_stalls are tuned for 24k context window models.
+    # Lower values reduce cumulative context growth across turns.
     team = MagenticOneGroupChat(
         [coder, executor, file_surfer, web_surfer],
         model_client=orchestrator_client,
-        max_turns=20,
+        max_turns=int(os.environ.get("MAGENTIC_MAX_TURNS", "10")),
+        max_stalls=int(os.environ.get("MAGENTIC_MAX_STALLS", "2")),
         final_answer_prompt= f""",
 We have completed the following task:
 
