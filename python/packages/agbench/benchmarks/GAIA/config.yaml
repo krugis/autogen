@@ -7,19 +7,21 @@
 ###############################
 # Local LLM configuration    #
 ###############################
-model_config: &client
+client_config_base: &client_cfg
+  model: gemma-4-26B-A4B-APEX-I-Mini.gguf
+  base_url: http://localhost:8080/v1/
+  api_key: not-needed
+  model_info:
+    function_calling: true
+    json_output: true
+    structured_output: true
+    vision: false
+    family: gemma
+
+model_config_base: &client_base
   provider: autogen_ext.models.openai.OpenAIChatCompletionClient
   config:
-    model: gemma-4-26B-A4B-APEX-I-Mini.gguf
-    base_url: http://localhost:8080/v1/
-    api_key: not-needed
-    max_tokens: 2048          # cap per-call completion; keeps prompt headroom in 24k window
-    model_info:
-      function_calling: true
-      json_output: true
-      structured_output: true
-      vision: false
-      family: gemma
+    <<: *client_cfg
 
 
 ##############################
@@ -41,7 +43,26 @@ model_config: &client
 #######################
 # Used by MagenticOne #
 #######################
-orchestrator_client: *client
-coder_client: *client
-web_surfer_client: *client
-file_surfer_client: *client  
+# Keep orchestrator concise to preserve prompt headroom in 24k models.
+# Orchestrator uses structured JSON (LedgerEntry) for planning; Gemma outputs verbose JSON.
+# No completion cap here — prompts are small (~1-5k) so 24k window is not threatened.
+orchestrator_client: *client_base
+
+# Let tool-using agents return longer outputs when needed.
+coder_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 3072
+
+web_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 2048
+
+file_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 2048

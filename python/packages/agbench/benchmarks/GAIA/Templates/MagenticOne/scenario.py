@@ -82,7 +82,10 @@ async def main() -> None:
         model_client = coder_client,
     )
 
-    executor = CodeExecutorAgent("ComputerTerminal", code_executor=LocalCommandLineCodeExecutor())
+    # Use an explicit work_dir to avoid FileNotFoundError from os.getcwd() in native agbench runs.
+    _work_dir = os.path.abspath("code_workspace")
+    os.makedirs(_work_dir, exist_ok=True)
+    executor = CodeExecutorAgent("ComputerTerminal", code_executor=LocalCommandLineCodeExecutor(work_dir=_work_dir))
 
     file_surfer = FileSurfer(
         name="FileSurfer",
