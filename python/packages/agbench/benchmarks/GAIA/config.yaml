@@ -5,12 +5,20 @@
 # good place to store model or other configurations important for the scenario.
 
 ###############################
-# Open AI model configuration #
+# Local LLM configuration    #
 ###############################
 model_config: &client
   provider: autogen_ext.models.openai.OpenAIChatCompletionClient
   config:
-    model: gpt-4o
+    model: gemma-4-26B-A4B-APEX-I-Mini.gguf
+    base_url: http://localhost:8080/v1/
+    api_key: not-needed
+    model_info:
+      function_calling: true
+      json_output: true
+      structured_output: true
+      vision: false
+      family: gemma
 
 
 ##############################
