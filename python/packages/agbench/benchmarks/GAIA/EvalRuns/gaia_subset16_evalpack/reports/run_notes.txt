@@ -1,0 +1,6 @@
+Use this command for the subset16 run:
+cd /home/atemin/autogen/python/packages/agbench/benchmarks/GAIA
+rm -rf Results/gaia_validation_subset16__MagenticOne
+MAGENTIC_MAX_TURNS=6 MAGENTIC_MAX_STALLS=2 /home/atemin/autogen/.venv/bin/python3 Scripts/run_with_progress.py Tasks/gaia_validation_subset16__MagenticOne.jsonl -r 1 -p 2 --refresh-seconds 0.5 --log-tail-lines 8
+
+Store derived reports in EvalRuns/gaia_subset16_evalpack/reports and extra artifacts in EvalRuns/gaia_subset16_evalpack/artifacts.
