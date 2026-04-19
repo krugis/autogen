@@ -1,0 +1,46 @@
+# config.vertex_gemma4_26b_a4b_it_maas_proxy_fair.yaml
+# Fairness-preserving profile for rerun against run_004.
+#
+# Same behavioral settings as prior fair run (including structured_output=true),
+# but uses local refresh proxy to eliminate token-expiry 401 failures.
+
+client_config_base: &client_cfg
+  model: google/gemma-4-26b-a4b-it-maas
+  base_url: http://127.0.0.1:8099/v1/projects/llmforall/locations/global/endpoints/openapi
+  api_key: proxy-managed
+  max_retries: 6
+  model_info:
+    function_calling: true
+    json_output: true
+    structured_output: true
+    vision: false
+    family: gemma
+
+model_config_base: &client_base
+  provider: autogen_ext.models.openai.OpenAIChatCompletionClient
+  config:
+    <<: *client_cfg
+
+orchestrator_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 24576
+
+coder_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 12288
+
+web_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 8192
+
+file_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 8192

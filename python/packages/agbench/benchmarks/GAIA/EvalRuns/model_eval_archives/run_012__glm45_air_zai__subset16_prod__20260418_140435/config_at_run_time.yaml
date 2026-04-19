@@ -1,0 +1,45 @@
+# config.zai_glm45_air.yaml
+# GAIA MagenticOne config for Z.AI glm-4.5-air cloud model.
+
+client_config_base: &client_cfg
+  model: glm-4.5-air
+  base_url: https://api.z.ai/api/paas/v4
+  api_key: ${ZAI_API_KEY}
+  extra_body:
+    thinking:
+      type: disabled
+  model_info:
+    function_calling: true
+    json_output: true
+    structured_output: false
+    vision: false
+    family: glm
+
+model_config_base: &client_base
+  provider: autogen_ext.models.openai.OpenAIChatCompletionClient
+  config:
+    <<: *client_cfg
+
+orchestrator_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 24576
+
+coder_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 12288
+
+web_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 8192
+
+file_surfer_client:
+  <<: *client_base
+  config:
+    <<: *client_cfg
+    max_tokens: 8192

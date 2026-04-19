@@ -1,0 +1,440 @@
+{
+  "run_dir": "Results/gaia_validation_subset16__MagenticOne__glm45air_prod_20260418",
+  "archive_dir": "EvalRuns/model_eval_archives/run_012__glm45_air_zai__subset16_prod__20260418_140435",
+  "summary": {
+    "tasks": 16,
+    "instances": 32,
+    "completed": 30,
+    "passed": 10,
+    "prompt_tokens": 2144344,
+    "completion_tokens": 828993,
+    "total_tokens": 2973337,
+    "llm_calls": 618,
+    "errors": 52
+  },
+  "task_passed": 7,
+  "task_total": 16,
+  "pass_rate_instances": "10/32 (31.2%)",
+  "pass_rate_tasks": "7/16 (43.8%)",
+  "level_instance_rates": {
+    "1": "6/10 (60.0%)",
+    "2": "2/16 (12.5%)",
+    "3": "2/6 (33.3%)"
+  },
+  "level_task_rates": {
+    "1": "3/5 (60.0%)",
+    "2": "2/8 (25.0%)",
+    "3": "2/3 (66.7%)"
+  },
+  "failure_reasons": {
+    "wrong_answer": 17,
+    "no_final_answer_other": 5
+  },
+  "avg_tokens_per_instance": 92917.0,
+  "avg_llm_calls_per_instance": 19.3,
+  "top_token_consumers": [
+    {
+      "task_id": "7673d772-ef80-4f0f-a602-1bf4485c9b43",
+      "repeat": "0",
+      "level": 1,
+      "expected": "inference",
+      "final": "witnesses",
+      "reason": "wrong_answer",
+      "tokens": 170572,
+      "llm_calls": 26,
+      "error_count": 0
+    },
+    {
+      "task_id": "7673d772-ef80-4f0f-a602-1bf4485c9b43",
+      "repeat": "1",
+      "level": 1,
+      "expected": "inference",
+      "final": null,
+      "reason": "no_final_answer_other",
+      "tokens": 139075,
+      "llm_calls": 20,
+      "error_count": 1
+    },
+    {
+      "task_id": "8b3379c0-0981-4f5b-8407-6444610cb212",
+      "repeat": "0",
+      "level": 2,
+      "expected": "1.8",
+      "final": "9",
+      "reason": "wrong_answer",
+      "tokens": 138521,
+      "llm_calls": 26,
+      "error_count": 0
+    },
+    {
+      "task_id": "0a3cd321-3e76-4622-911b-0fda2e5d6b1a",
+      "repeat": "1",
+      "level": 2,
+      "expected": "Brunei, China, Morocco, Singapore",
+      "final": "China, Equatorial Guinea, Kuwait, Norway, Qatar, Saudi Arabia, Timor-Leste",
+      "reason": "wrong_answer",
+      "tokens": 132611,
+      "llm_calls": 22,
+      "error_count": 1
+    },
+    {
+      "task_id": "2a649bb1-795f-4a01-b3be-9a01868dae73",
+      "repeat": "1",
+      "level": 2,
+      "expected": "3.1.3.1; 1.11.1.7",
+      "final": "EC 3.1.3.1; EC 1.11.1.7",
+      "reason": "wrong_answer",
+      "tokens": 132283,
+      "llm_calls": 28,
+      "error_count": 3
+    },
+    {
+      "task_id": "bfcd99e1-0690-4b53-a85c-0174a8629083",
+      "repeat": "1",
+      "level": 2,
+      "expected": "17",
+      "final": "3",
+      "reason": "wrong_answer",
+      "tokens": 126631,
+      "llm_calls": 27,
+      "error_count": 6
+    },
+    {
+      "task_id": "0bdb7c40-671d-4ad1-9ce3-986b159c0ddc",
+      "repeat": "1",
+      "level": 3,
+      "expected": "White; 5876",
+      "final": "Allen;8204",
+      "reason": "wrong_answer",
+      "tokens": 123024,
+      "llm_calls": 26,
+      "error_count": 1
+    },
+    {
+      "task_id": "ad2b4d70-9314-4fe6-bfbe-894a45f6055f",
+      "repeat": "0",
+      "level": 3,
+      "expected": "War is not here this is a land of peace",
+      "final": "hidden knowledge",
+      "reason": "wrong_answer",
+      "tokens": 111532,
+      "llm_calls": 27,
+      "error_count": 1
+    }
+  ],
+  "passed_task_ids": [
+    "0bdb7c40-671d-4ad1-9ce3-986b159c0ddc",
+    "11af4e1a-5f45-467d-9aeb-46f4bb0bf034",
+    "2a649bb1-795f-4a01-b3be-9a01868dae73",
+    "dc28cf18-6431-458b-83ef-64b3ce566c10",
+    "e961a717-6b25-4175-8a68-874d28190ee4",
+    "e9a2c537-8232-4c3f-85b0-b52de6bcba99",
+    "f918266a-b3e0-4914-865d-4faa564f1aef"
+  ],
+  "per_task": {
+    "076c8171-9b3b-49b9-a477-244d2a532826": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "electronics",
+          "expected": "Finance",
+          "tokens": 86475
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "food court",
+          "expected": "Finance",
+          "tokens": 76111
+        }
+      ]
+    },
+    "0a3cd321-3e76-4622-911b-0fda2e5d6b1a": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "Afghanistan, Angola, Azerbaijan, Bahrain, Belarus, Botswana, Brunei, Congo, Democratic Republic of the, Congo, Republic of the, Equatorial Guinea, Gabon, Iran, Islamic Republic of, Kazakhstan, Kuwait, Libya, Norway, Oman, Qatar, Russian Federation, Saudi Arabia, Timor-Leste, Turkmenistan, United Arab Emirates, Uzbekistan, Venezuela, Republic of",
+          "expected": "Brunei, China, Morocco, Singapore",
+          "tokens": 55860
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "China, Equatorial Guinea, Kuwait, Norway, Qatar, Saudi Arabia, Timor-Leste",
+          "expected": "Brunei, China, Morocco, Singapore",
+          "tokens": 132611
+        }
+      ]
+    },
+    "0bdb7c40-671d-4ad1-9ce3-986b159c0ddc": {
+      "level": 3,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": true,
+          "final": "White;5876",
+          "expected": "White; 5876",
+          "tokens": 140721
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "Allen;8204",
+          "expected": "White; 5876",
+          "tokens": 123024
+        }
+      ]
+    },
+    "11af4e1a-5f45-467d-9aeb-46f4bb0bf034": {
+      "level": 1,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": true,
+          "final": "6",
+          "expected": "6",
+          "tokens": 156422
+        },
+        {
+          "repeat": "1",
+          "passed": true,
+          "final": "6",
+          "expected": "6",
+          "tokens": 131665
+        }
+      ]
+    },
+    "2a649bb1-795f-4a01-b3be-9a01868dae73": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": true,
+          "final": "3.1.3.1;1.11.1.7",
+          "expected": "3.1.3.1; 1.11.1.7",
+          "tokens": 126202
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "EC 3.1.3.1; EC 1.11.1.7",
+          "expected": "3.1.3.1; 1.11.1.7",
+          "tokens": 132283
+        }
+      ]
+    },
+    "72e110e7-464c-453c-a309-90a95aed6538": {
+      "level": 1,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "[No answer provided]**",
+          "expected": "Guatemala",
+          "tokens": 107718
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": null,
+          "expected": "Guatemala",
+          "tokens": 0
+        }
+      ]
+    },
+    "7673d772-ef80-4f0f-a602-1bf4485c9b43": {
+      "level": 1,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "witnesses",
+          "expected": "inference",
+          "tokens": 170572
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": null,
+          "expected": "inference",
+          "tokens": 139075
+        }
+      ]
+    },
+    "8b3379c0-0981-4f5b-8407-6444610cb212": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "9",
+          "expected": "1.8",
+          "tokens": 138521
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "0.3",
+          "expected": "1.8",
+          "tokens": 103089
+        }
+      ]
+    },
+    "ad2b4d70-9314-4fe6-bfbe-894a45f6055f": {
+      "level": 3,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "hidden knowledge",
+          "expected": "War is not here this is a land of peace",
+          "tokens": 111532
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "dragon eye",
+          "expected": "War is not here this is a land of peace",
+          "tokens": 103675
+        }
+      ]
+    },
+    "bfcd99e1-0690-4b53-a85c-0174a8629083": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "0",
+          "expected": "17",
+          "tokens": 72564
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "3",
+          "expected": "17",
+          "tokens": 126631
+        }
+      ]
+    },
+    "d8152ad6-e4d5-4c12-8bb7-8d57dc10c6de": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "0.05",
+          "expected": "0.03",
+          "tokens": 86914
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": null,
+          "expected": "0.03",
+          "tokens": 102691
+        }
+      ]
+    },
+    "dc28cf18-6431-458b-83ef-64b3ce566c10": {
+      "level": 1,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": true,
+          "final": "2",
+          "expected": "2",
+          "tokens": 24107
+        },
+        {
+          "repeat": "1",
+          "passed": true,
+          "final": "2",
+          "expected": "2",
+          "tokens": 40227
+        }
+      ]
+    },
+    "e961a717-6b25-4175-8a68-874d28190ee4": {
+      "level": 3,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": null,
+          "expected": "12",
+          "tokens": 0
+        },
+        {
+          "repeat": "1",
+          "passed": true,
+          "final": "12",
+          "expected": "12",
+          "tokens": 114499
+        }
+      ]
+    },
+    "e9a2c537-8232-4c3f-85b0-b52de6bcba99": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": null,
+          "expected": "7",
+          "tokens": 42681
+        },
+        {
+          "repeat": "1",
+          "passed": true,
+          "final": "7",
+          "expected": "7",
+          "tokens": 57426
+        }
+      ]
+    },
+    "f2feb6a4-363c-4c09-a804-0db564eafd68": {
+      "level": 2,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": false,
+          "final": "860000",
+          "expected": "900000",
+          "tokens": 93750
+        },
+        {
+          "repeat": "1",
+          "passed": false,
+          "final": "unknown",
+          "expected": "900000",
+          "tokens": 103070
+        }
+      ]
+    },
+    "f918266a-b3e0-4914-865d-4faa564f1aef": {
+      "level": 1,
+      "repeats": [
+        {
+          "repeat": "0",
+          "passed": true,
+          "final": "0",
+          "expected": "0",
+          "tokens": 26021
+        },
+        {
+          "repeat": "1",
+          "passed": true,
+          "final": "0",
+          "expected": "0",
+          "tokens": 47200
+        }
+      ]
+    }
+  }
+}

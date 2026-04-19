@@ -1,0 +1,18 @@
+Run ID: run_012__glm45_air_zai__subset16_prod__20260418_140435
+Run Date: 2026-04-18
+Model: glm-4.5-air (Z.AI cloud)
+Provider: z.ai
+Base URL: https://api.z.ai/api/paas/v4
+Tasks: 16
+Total Instances: 32
+Completed Instances: 30
+Passed Instances: 10
+Passed Tasks: 7
+Pass Rate (Instances): 10/32 (31.2%)
+Pass Rate (Tasks): 7/16 (43.8%)
+Total Tokens: 2,973,337
+Prompt Tokens: 2,144,344
+Completion Tokens: 828,993
+LLM Calls: 618
+Errors: 52
+Config: structured_output=false, thinking=disabled

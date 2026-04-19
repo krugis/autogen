@@ -1,0 +1,52 @@
+{
+  "instances_total": 32,
+  "instances_passed": 9,
+  "instance_pass_rate_pct": 28.1,
+  "tasks_total": 16,
+  "tasks_pass_any": 7,
+  "task_pass_any_pct": 43.8,
+  "tasks_pass_all": 2,
+  "task_pass_all_pct": 12.5,
+  "prompt_tokens": 1791783,
+  "completion_tokens": 168549,
+  "total_tokens": 1960332,
+  "avg_tokens_per_instance": 61260.4,
+  "runtime_seconds_total": 4114,
+  "avg_runtime_per_instance_seconds": 128.6,
+  "llm_calls": 553,
+  "errors": 62,
+  "failure_breakdown": {
+    "WRONG_ANSWER": 16,
+    "NO_FINAL_ANSWER": 7,
+    "PASS": 9
+  },
+  "level_breakdown": {
+    "1": {
+      "passed": 5,
+      "total": 10
+    },
+    "2": {
+      "passed": 3,
+      "total": 16
+    },
+    "3": {
+      "passed": 1,
+      "total": 6
+    }
+  },
+  "attachment_breakdown": {
+    "0": {
+      "passed": 5,
+      "total": 22
+    },
+    "1": {
+      "passed": 4,
+      "total": 10
+    }
+  },
+  "operational_markers": {
+    "auth_401_or_perm": 1,
+    "length_finish": 0,
+    "timeout_markers": 0
+  }
+}

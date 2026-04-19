@@ -1,0 +1,70 @@
+================================================================================
+GAIA EVAL RUN METADATA
+================================================================================
+
+RUN IDENTIFIER: run_004__gemma4_26b_a4b__subset16_2x__20260417_220653
+
+CONFIGURATION
+─────────────
+Model:                  gemma-4-26B-A4B-APEX-I-Mini.gguf
+Context window:         98,304 tokens (llama.cpp --ctx-size 98304)
+Base URL:               http://localhost:8080/v1/
+Framework:              AutoGen MagenticOne
+Tasks:                  16 (gaia_validation_subset16__MagenticOne)
+Repeats per Task:       2
+Total Instances:        32
+Run Date:               2026-04-17
+
+TOKEN ALLOCATION
+────────────────
+Orchestrator Client:    max_tokens=24,576
+Coder Client:           max_tokens=12,288
+Web/File Clients:       max_tokens=8,192
+Context Mgmt:           MAGENTIC_MAX_TURNS=4, MAGENTIC_MAX_STALLS=2
+
+KEY RESULTS
+───────────
+Passed:                 11/32 (34.4%)
+Failed:                 21/32 (65.6%)
+Prompt Tokens:          1,973,628
+Completion Tokens:      202,432
+Total Tokens:           2,176,060
+Avg Tokens/Instance:    68,001.9
+Total Runtime:          3,562s (59.4 min)
+Avg Runtime/Instance:   111.3s
+Total LLM Calls:        625
+Avg LLM Calls/Instance: 19.5
+Avg Tokens/Call:        3,481.7
+
+LEVEL BREAKDOWN
+───────────────
+L1:                     6/10 (60.0%)
+L2:                     3/16 (18.8%)
+L3:                     2/6 (33.3%)
+
+ATTACHMENT BREAKDOWN
+────────────────────
+No file:                6/22 (27.3%)
+Has file:               5/10 (50.0%)
+
+FAILURE CATEGORIES
+──────────────────
+WRONG_ANSWER:           18
+NO_FINAL_ANSWER_LEDGER_PARSE: 2
+NO_FINAL_ANSWER_OTHER:  1
+
+COMPARISON TO GLM run_003
+─────────────────────────
+Pass rate:              34.4% vs 15.6%
+Total runtime:          59.4 min vs 5:34h
+Total tokens:           2.18M vs 3.04M
+Main difference:        Gemma produced shorter, more efficient LLM calls and far fewer parser failures.
+
+ARCHIVE CONTENTS
+────────────────
+ANALYSIS_REPORT.md
+RUN_METADATA.txt
+config_at_run_time.yaml
+gaia_validation_subset16__MagenticOne.jsonl
+instances/
+================================================================================

@@ -1,0 +1,65 @@
+================================================================================
+GAIA EVAL RUN METADATA
+================================================================================
+
+RUN IDENTIFIER: run_003__glm47_flash_apex_i_mini__subset16_2x__20260417_201549
+
+CONFIGURATION
+─────────────
+Model:                  GLM-4.7-Flash-APEX-I-Mini.gguf
+Context window:         98,304 tokens (llama.cpp --ctx-size 98304)
+Base URL:               http://localhost:8080/v1/
+Framework:              AutoGen MagenticOne
+Tasks:                  16 (gaia_validation_subset16__MagenticOne)
+Repeats per Task:       2
+Total Instances:        32 (16 tasks × 2 repeats)
+Run Date:               2026-04-17
+
+TOKEN ALLOCATION (per client max_tokens)
+────────────────────────────────────────
+Orchestrator Client:    max_tokens=24,576
+Coder Client:           max_tokens=12,288
+Web/File Clients:       max_tokens=8,192
+Context Mgmt:           MAGENTIC_MAX_TURNS=4, MAGENTIC_MAX_STALLS=2
+
+KEY RESULTS
+───────────
+Total Passed:           5/32 instances (15.6%)
+Total Tokens (all):     3,038,898
+Avg Tokens/Instance:    94,966
+Total Runtime:          20,063s (5:34h)
+Avg Runtime/Instance:   626s
+
+PASS RATE BY LEVEL
+  L1 (Explicit):        2/10 (20%)
+  L2 (Implicit):        3/16 (18.8%)
+  L3 (Reasoning):       0/6 (0%)
+
+PASSED TASKS
+  11af4e1a (count=6):    100% (2/2) — L1
+  f918266a (=0):         100% (2/2) — L2
+  dc28cf18 (text):        50% (1/2) — L2
+
+FAILURE ROOT CAUSES
+  WRONG_ANSWER:          15/27 failures (55.6%) — answer extracted but incorrect
+  NO_FINAL_ANSWER:       12/27 failures (44.4%)
+    → LengthFinishReasonError (orchestrator ceiling 24576): 4
+    → LedgerEntry JSON parse/pydantic error:                5
+    → Tool error exhausted turns:                           2
+    → Misc:                                                 1
+
+VS GEMMA run_001
+────────────────
+  Format compliance:  62.5% vs 25%  (+37.5pp, GLM much better)
+  Answer accuracy:    5/20 correct produced = 25% vs 6/8 = 75%
+  Overall pass rate:  15.6% vs 18.8% (slight regression)
+
+================================================================================
+ARCHIVE FILES
+================================================================================
+ANALYSIS_REPORT.md          — Full 10-section report with comparison tables
+RUN_METADATA.txt            — This file
+config_at_run_time.yaml     — Exact config.yaml used during the run
+gaia_validation_subset16__MagenticOne.jsonl — 16 task definitions
+instances/                  — 32 instance dirs (console_log.txt, metrics.json, etc.)
+================================================================================

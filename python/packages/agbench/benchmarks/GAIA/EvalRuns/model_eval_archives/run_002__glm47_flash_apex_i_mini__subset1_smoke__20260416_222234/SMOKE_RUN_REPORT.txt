@@ -1,0 +1,26 @@
+GAIA SMOKE RUN REPORT
+
+Run ID: run_002__glm47_flash_apex_i_mini__subset1_smoke__20260416_222234
+Date: 2026-04-16 19:22:34 UTC
+Model: GLM-4.7-Flash-APEX-I-Mini.gguf
+API: http://localhost:8080/v1/
+Task file: Tasks/gaia_validation_subset1__MagenticOne.jsonl
+Parameters: MAGENTIC_MAX_TURNS=4 MAGENTIC_MAX_STALLS=2 -r 1 -p 1 --refresh-seconds 0.5 --log-tail-lines 8
+
+Final Summary:
+- Exit Code: 0
+- Completed Tasks: 1/1
+- Completed Instances: 1/1
+- Elapsed: 00:02:51
+- Total Tokens: 30,628
+- Avg Tokens/Instance: 30,628.0
+
+Scenario tail:
+- LLM_CALL_COUNT: 8
+- ERROR_COUNT: 1
+- FINAL_ANSWER_EXTRACTED: 6
+- EXPECTED_ANSWER: 6
+- Result: ALL TESTS PASSED
+
+Archive path:
+GAIA/EvalRuns/model_eval_archives/run_002__glm47_flash_apex_i_mini__subset1_smoke__20260416_222234
