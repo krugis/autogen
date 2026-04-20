@@ -131,6 +131,191 @@ class MagenticOneOrchestrator(BaseGroupChatManager):
     async def _log_message(self, log_message: str) -> None:
         trace_logger.debug(log_message)
 
+    def _coerce_bool_answer(self, value: Any, default: bool) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"true", "yes", "y", "1"}:
+                return True
+            if normalized in {"false", "no", "n", "0"}:
+                return False
+        return default
+
+    def _wrap_ledger_value(self, value: Any, *, default_answer: Any, default_reason: str) -> Dict[str, Any]:
+        if isinstance(value, dict):
+            answer = value.get("answer", default_answer)
+            reason = value.get("reason")
+            if not isinstance(reason, str) or not reason.strip():
+                reason = default_reason
+            return {"reason": reason, "answer": answer}
+        if value is None:
+            return {"reason": default_reason, "answer": default_answer}
+        return {"reason": default_reason, "answer": value}
+
+    def _latest_participant_message(self) -> tuple[str | None, str]:
+        for message in reversed(self._message_thread):
+            source = getattr(message, "source", None)
+            content = getattr(message, "content", None)
+            if source == self._name:
+                continue
+            if isinstance(content, str) and content.strip():
+                return source, content.strip()
+        return None, ""
+
+    def _choose_next_speaker(self, raw_text: str, latest_source: str | None) -> str:
+        for participant in self._participant_names:
+            if re.search(rf"\b{re.escape(participant)}\b", raw_text):
+                return participant
+
+        lowered = raw_text.lower()
+        if any(token in lowered for token in ("no code blocks found", "python code block", "script", "code")):
+            if "Coder" in self._participant_names:
+                return "Coder"
+        if any(token in lowered for token in ("file could not be found", ".xlsx", ".pdf", ".zip", "/workspace/")):
+            if "FileSurfer" in self._participant_names:
+                return "FileSurfer"
+            if "Coder" in self._participant_names:
+                return "Coder"
+        if any(token in lowered for token in ("website", "search", "wikipedia", "youtube", "world bank")):
+            if "WebSurfer" in self._participant_names:
+                return "WebSurfer"
+        if any(token in lowered for token in ("run", "execute", "terminal")) and "ComputerTerminal" in self._participant_names:
+            return "ComputerTerminal"
+
+        if latest_source in self._participant_names and latest_source != "ComputerTerminal":
+            return latest_source
+        if "Coder" in self._participant_names:
+            return "Coder"
+        return self._participant_names[0]
+
+    def _choose_instruction(self, latest_text: str, next_speaker: str, raw_ledger: str) -> str:
+        lowered = latest_text.lower()
+        if "file could not be found" in lowered:
+            return (
+                "Verify the attached file is present under /workspace, then provide a complete runnable Python "
+                "code block that opens the correct file path and continues the task."
+            )
+        if "no code blocks found" in lowered:
+            return "Provide a complete runnable Python code block for the next step, with no extra prose."
+        if "could not extract text" in lowered or "pdftotext not found" in lowered:
+            return (
+                "Use an alternative available tool or Python library to read the attached file from /workspace and "
+                "continue the task."
+            )
+
+        fallback = latest_text or raw_ledger
+        fallback = re.sub(r"```.*?```", " ", fallback, flags=re.S)
+        fallback = re.sub(r"\s+", " ", fallback).strip()
+        if fallback:
+            if next_speaker == "ComputerTerminal":
+                return f"Run the next concrete step for this task: {fallback[:350]}"
+            return fallback[:350]
+        return "Continue working on the task and produce the next concrete step needed to solve it."
+
+    def _normalize_progress_ledger(self, candidate: Dict[str, Any], raw_ledger: str) -> Dict[str, Any]:
+        latest_source, latest_text = self._latest_participant_message()
+        default_next_speaker = self._choose_next_speaker(f"{raw_ledger}\n{latest_text}", latest_source)
+        default_instruction = self._choose_instruction(latest_text, default_next_speaker, raw_ledger)
+        default_reason = "Recovered from malformed progress ledger output."
+
+        ledger: Dict[str, Any] = {
+            "is_request_satisfied": self._wrap_ledger_value(
+                candidate.get("is_request_satisfied"), default_answer=False, default_reason=default_reason
+            ),
+            "is_in_loop": self._wrap_ledger_value(
+                candidate.get("is_in_loop"), default_answer=False, default_reason=default_reason
+            ),
+            "is_progress_being_made": self._wrap_ledger_value(
+                candidate.get("is_progress_being_made"), default_answer=True, default_reason=default_reason
+            ),
+            "next_speaker": self._wrap_ledger_value(
+                candidate.get("next_speaker"),
+                default_answer=default_next_speaker,
+                default_reason=default_reason,
+            ),
+            "instruction_or_question": self._wrap_ledger_value(
+                candidate.get("instruction_or_question"),
+                default_answer=default_instruction,
+                default_reason=default_reason,
+            ),
+        }
+
+        ledger["is_request_satisfied"]["answer"] = self._coerce_bool_answer(
+            ledger["is_request_satisfied"]["answer"], False
+        )
+        ledger["is_in_loop"]["answer"] = self._coerce_bool_answer(ledger["is_in_loop"]["answer"], False)
+        ledger["is_progress_being_made"]["answer"] = self._coerce_bool_answer(
+            ledger["is_progress_being_made"]["answer"], True
+        )
+
+        next_speaker = str(ledger["next_speaker"]["answer"]).strip()
+        if next_speaker not in self._participant_names:
+            next_speaker = default_next_speaker
+        ledger["next_speaker"]["answer"] = next_speaker
+
+        instruction = str(ledger["instruction_or_question"]["answer"]).strip()
+        if not instruction:
+            instruction = default_instruction
+        ledger["instruction_or_question"]["answer"] = instruction
+
+        return ledger
+
+    def _parse_progress_ledger(self, ledger_str: str) -> Dict[str, Any] | None:
+        candidates: List[Dict[str, Any]] = []
+        try:
+            output_json = extract_json_from_str(ledger_str)
+            for item in output_json:
+                if isinstance(item, dict):
+                    candidates.append(item)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
+
+        stripped = ledger_str.strip()
+        if stripped.startswith("{") and stripped.endswith("}"):
+            try:
+                parsed = json.loads(stripped)
+                if isinstance(parsed, dict):
+                    candidates.append(parsed)
+            except Exception:
+                pass
+
+        for candidate in candidates:
+            normalized = self._normalize_progress_ledger(candidate, ledger_str)
+            if normalized:
+                return normalized
+        return None
+
+    def _fallback_progress_ledger(self, ledger_str: str) -> Dict[str, Any]:
+        latest_source, latest_text = self._latest_participant_message()
+        combined_text = f"{ledger_str}\n{latest_text}".strip()
+        next_speaker = self._choose_next_speaker(combined_text, latest_source)
+        instruction = self._choose_instruction(latest_text, next_speaker, ledger_str)
+        lowered = latest_text.lower()
+        progress = not any(token in lowered for token in ("file could not be found", "no code blocks found"))
+        return {
+            "is_request_satisfied": {
+                "reason": "Fallback ledger created after repeated parse failures.",
+                "answer": False,
+            },
+            "is_in_loop": {
+                "reason": "Fallback ledger created after repeated parse failures.",
+                "answer": False,
+            },
+            "is_progress_being_made": {
+                "reason": "Fallback ledger created after repeated parse failures.",
+                "answer": progress,
+            },
+            "next_speaker": {
+                "reason": "Selected deterministically after ledger parse failure.",
+                "answer": next_speaker,
+            },
+            "instruction_or_question": {
+                "reason": "Recovered from malformed ledger output.",
+                "answer": instruction,
+            },
+        }
+
     @rpc
     async def handle_start(self, message: GroupChatStart, ctx: MessageContext) -> None:  # type: ignore
         """Handle the start of a task."""
@@ -315,6 +500,7 @@ class MagenticOneOrchestrator(BaseGroupChatManager):
         progress_ledger: Dict[str, Any] = {}
         assert self._max_json_retries > 0
         key_error: bool = False
+        ledger_str = ""
         for _ in range(self._max_json_retries):
             if self._model_client.model_info.get("structured_output", False):
                 response = await self._model_client.create(
@@ -329,59 +515,24 @@ class MagenticOneOrchestrator(BaseGroupChatManager):
                     self._get_compatible_context(context), cancellation_token=cancellation_token
                 )
             ledger_str = response.content
-            try:
-                assert isinstance(ledger_str, str)
-                output_json = extract_json_from_str(ledger_str)
-                if len(output_json) != 1:
-                    raise ValueError(
-                        f"Progress ledger should contain a single JSON object, but found: {len(progress_ledger)}"
-                    )
-                progress_ledger = output_json[0]
+            assert isinstance(ledger_str, str)
+            progress_ledger = self._parse_progress_ledger(ledger_str) or {}
 
-                # If the team consists of a single agent, deterministically set the next speaker
-                if len(self._participant_names) == 1:
-                    progress_ledger["next_speaker"] = {
-                        "reason": "The team consists of only one agent.",
-                        "answer": self._participant_names[0],
-                    }
+            # If the team consists of a single agent, deterministically set the next speaker
+            if progress_ledger and len(self._participant_names) == 1:
+                progress_ledger["next_speaker"] = {
+                    "reason": "The team consists of only one agent.",
+                    "answer": self._participant_names[0],
+                }
 
-                # Validate the structure
-                required_keys = [
-                    "is_request_satisfied",
-                    "is_progress_being_made",
-                    "is_in_loop",
-                    "instruction_or_question",
-                    "next_speaker",
-                ]
-
-                key_error = False
-                for key in required_keys:
-                    if (
-                        key not in progress_ledger
-                        or not isinstance(progress_ledger[key], dict)
-                        or "answer" not in progress_ledger[key]
-                        or "reason" not in progress_ledger[key]
-                    ):
-                        key_error = True
-                        break
-
-                # Validate the next speaker if the task is not yet complete
-                if (
-                    not progress_ledger["is_request_satisfied"]["answer"]
-                    and progress_ledger["next_speaker"]["answer"] not in self._participant_names
-                ):
-                    key_error = True
-                    break
-
-                if not key_error:
-                    break
+            key_error = not progress_ledger
+            if key_error:
                 await self._log_message(f"Failed to parse ledger information, retrying: {ledger_str}")
-            except (json.JSONDecodeError, TypeError):
-                key_error = True
-                await self._log_message("Invalid ledger format encountered, retrying...")
                 continue
+            break
         if key_error:
-            raise ValueError("Failed to parse ledger information after multiple retries.")
+            progress_ledger = self._fallback_progress_ledger(ledger_str)
+            await self._log_message("Failed to parse ledger information after multiple retries; using fallback ledger.")
         await self._log_message(f"Progress Ledger: {progress_ledger}")
 
         # Check for task completion
