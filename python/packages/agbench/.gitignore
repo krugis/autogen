@@ -17,8 +17,8 @@ benchmarks/GAIA/EvalRuns/gaia_subset16_evalpack/runs/
 benchmarks/GAIA/EvalRuns/gaia_subset16_evalpack/reports/
 benchmarks/GAIA/EvalRuns/model_eval_archives/*
 
-# Keep evaluation report at archive root
-!benchmarks/GAIA/EvalRuns/model_eval_archives/EVALUATION_REPORT.md
+# Keep normalized evaluation report at archive root
+!benchmarks/GAIA/EvalRuns/model_eval_archives/NORMALIZED_EVALUATION_REPORT.md
 
 # Keep only selected public archive runs for publishing
 !benchmarks/GAIA/EvalRuns/model_eval_archives/run_002__*/
@@ -63,6 +63,7 @@ benchmarks/GAIA/EvalRuns/EVAL_SUMMARY.md
 benchmarks/GAIA/EvalRuns/model_eval_archives/EVAL_SUMMARY.md
 benchmarks/GAIA/EvalRuns/model_eval_archives/agentic_comparison_*.json
 benchmarks/GAIA/EvalRuns/model_eval_archives/archive_forensics_*.json
+!benchmarks/GAIA/EvalRuns/model_eval_archives/agentic_comparison_003_004.json
 benchmarks/GAIA/EvalRuns/GEMINI_SMOKE_QUICK_START.md
 benchmarks/GAIA/EvalRuns/curl_examples_gemini_thinking.sh
 benchmarks/GAIA/EvalRuns/gemini_smoke_run_guide.md

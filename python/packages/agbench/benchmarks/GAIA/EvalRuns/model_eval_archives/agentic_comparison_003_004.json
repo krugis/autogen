@@ -1,0 +1,1213 @@
+{
+  "generated": "2026-04-18",
+  "glm": {
+    "label": "GLM-4.7-Flash (run_003)",
+    "instances": 32,
+    "tasks": 16,
+    "passed": 5,
+    "pass_rate": 15.6,
+    "by_level": {
+      "L1": {
+        "total": 10,
+        "passed": 5,
+        "rate": 50.0
+      },
+      "L2": {
+        "total": 16,
+        "passed": 0,
+        "rate": 0.0
+      },
+      "L3": {
+        "total": 6,
+        "passed": 0,
+        "rate": 0.0
+      }
+    },
+    "answer_extraction_rate": 62.5,
+    "no_answer_count": 12,
+    "ledger_parse_errors": 1163,
+    "length_finish_errors": 12,
+    "tool_errors_log": 31,
+    "total_tool_calls": 0,
+    "total_errors": 92,
+    "avg_tool_calls_per_instance": 0.0,
+    "avg_errors_per_instance": 2.9,
+    "error_rate_pct": 19.0,
+    "total_tokens": 3038898,
+    "total_prompt": 1460902,
+    "total_completion": 1577996,
+    "prompt_completion_ratio": 0.93,
+    "avg_tokens_per_instance": 94966.0,
+    "avg_tokens_per_llm_call": 6279.0,
+    "median_tokens_per_instance": 109845,
+    "stddev_tokens": 61643.0,
+    "total_llm_calls": 484,
+    "avg_llm_calls_per_instance": 15.1,
+    "median_llm_calls": 23,
+    "total_agent_messages": 490,
+    "avg_agent_msgs_per_instance": 15.3,
+    "total_runtime_s": 20063,
+    "avg_runtime_s": 627.0,
+    "median_runtime_s": 625.5,
+    "min_runtime_s": 113,
+    "max_runtime_s": 2090,
+    "effective_tok_per_sec": 151.5,
+    "instances_per_hour": 5.7,
+    "repeat_consistent": 15,
+    "repeat_both_pass": 2,
+    "repeat_both_fail": 13,
+    "repeat_split": 1,
+    "repeatability_pct": 93.8,
+    "tokens_per_correct_answer": 607780.0,
+    "runtime_per_correct_answer_s": 4012.6
+  },
+  "gemma": {
+    "label": "Gemma-4-26B-A4B (run_004)",
+    "instances": 32,
+    "tasks": 16,
+    "passed": 11,
+    "pass_rate": 34.4,
+    "by_level": {
+      "L1": {
+        "total": 10,
+        "passed": 6,
+        "rate": 60.0
+      },
+      "L2": {
+        "total": 16,
+        "passed": 3,
+        "rate": 18.8
+      },
+      "L3": {
+        "total": 6,
+        "passed": 2,
+        "rate": 33.3
+      }
+    },
+    "answer_extraction_rate": 90.6,
+    "no_answer_count": 3,
+    "ledger_parse_errors": 1127,
+    "length_finish_errors": 0,
+    "tool_errors_log": 12,
+    "total_tool_calls": 0,
+    "total_errors": 50,
+    "avg_tool_calls_per_instance": 0.0,
+    "avg_errors_per_instance": 1.6,
+    "error_rate_pct": 8.0,
+    "total_tokens": 2176060,
+    "total_prompt": 1973628,
+    "total_completion": 202432,
+    "prompt_completion_ratio": 9.75,
+    "avg_tokens_per_instance": 68002.0,
+    "avg_tokens_per_llm_call": 3482.0,
+    "median_tokens_per_instance": 80215.0,
+    "stddev_tokens": 40716.0,
+    "total_llm_calls": 625,
+    "avg_llm_calls_per_instance": 19.5,
+    "median_llm_calls": 26.5,
+    "total_agent_messages": 537,
+    "avg_agent_msgs_per_instance": 16.8,
+    "total_runtime_s": 3562,
+    "avg_runtime_s": 111.3,
+    "median_runtime_s": 130.5,
+    "min_runtime_s": 14,
+    "max_runtime_s": 338,
+    "effective_tok_per_sec": 610.9,
+    "instances_per_hour": 32.3,
+    "repeat_consistent": 15,
+    "repeat_both_pass": 5,
+    "repeat_both_fail": 10,
+    "repeat_split": 1,
+    "repeatability_pct": 93.8,
+    "tokens_per_correct_answer": 197824.0,
+    "runtime_per_correct_answer_s": 323.8
+  },
+  "task_head_to_head": {
+    "076c8171": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          203237,
+          209862
+        ],
+        "runtimes": [
+          965,
+          1001
+        ],
+        "llm_calls": [
+          23,
+          27
+        ],
+        "errors": [
+          11,
+          6
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "Restaurant",
+          "Convenience Store"
+        ],
+        "expected": "Finance"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "PASS"
+        ],
+        "tokens": [
+          48369,
+          38122
+        ],
+        "runtimes": [
+          68,
+          42
+        ],
+        "llm_calls": [
+          18,
+          12
+        ],
+        "errors": [
+          6,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "data not found**",
+          "Finance"
+        ],
+        "expected": "Finance"
+      }
+    },
+    "0a3cd321": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          108851
+        ],
+        "runtimes": [
+          382,
+          457
+        ],
+        "llm_calls": [
+          0,
+          25
+        ],
+        "errors": [
+          0,
+          5
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "Bhutan, Kuwait, Macao, China, Qatar, Saudi Arabia, Singapore, United Arab Emirates"
+        ],
+        "expected": "Brunei, China, Morocco, Singapore"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          109532,
+          0
+        ],
+        "runtimes": [
+          160,
+          82
+        ],
+        "llm_calls": [
+          31,
+          0
+        ],
+        "errors": [
+          4,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "None",
+          null
+        ],
+        "expected": "Brunei, China, Morocco, Singapore"
+      }
+    },
+    "0bdb7c40": {
+      "glm": {
+        "level": "3",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          237864,
+          191474
+        ],
+        "runtimes": [
+          2090,
+          1259
+        ],
+        "llm_calls": [
+          28,
+          24
+        ],
+        "errors": [
+          4,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "William Gregory; 13",
+          null
+        ],
+        "expected": "White; 5876"
+      },
+      "gemma": {
+        "level": "3",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          94025,
+          92016
+        ],
+        "runtimes": [
+          158,
+          129
+        ],
+        "llm_calls": [
+          28,
+          29
+        ],
+        "errors": [
+          0,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "Hatcher;768",
+          "Error: Search queries triggered CAPTCHA, information unretrievable."
+        ],
+        "expected": "White; 5876"
+      }
+    },
+    "11af4e1a": {
+      "glm": {
+        "level": "1",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          25213,
+          22208
+        ],
+        "runtimes": [
+          113,
+          140
+        ],
+        "llm_calls": [
+          8,
+          6
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "6",
+          "6"
+        ],
+        "expected": "6"
+      },
+      "gemma": {
+        "level": "1",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          24905,
+          58904
+        ],
+        "runtimes": [
+          42,
+          70
+        ],
+        "llm_calls": [
+          10,
+          19
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "6",
+          "6"
+        ],
+        "expected": "6"
+      }
+    },
+    "2a649bb1": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          150330,
+          208986
+        ],
+        "runtimes": [
+          655,
+          596
+        ],
+        "llm_calls": [
+          25,
+          25
+        ],
+        "errors": [
+          6,
+          5
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "1.2.3.2; 1.11.1.7",
+          "2.7.7.4; 3.1.3.1"
+        ],
+        "expected": "3.1.3.1; 1.11.1.7"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          94175,
+          91953
+        ],
+        "runtimes": [
+          210,
+          144
+        ],
+        "llm_calls": [
+          29,
+          27
+        ],
+        "errors": [
+          3,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "231-16-4;231-56-2",
+          "2.7.7.7;2.7.7.49"
+        ],
+        "expected": "3.1.3.1; 1.11.1.7"
+      }
+    },
+    "72e110e7": {
+      "glm": {
+        "level": "1",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          59686,
+          175306
+        ],
+        "runtimes": [
+          368,
+          547
+        ],
+        "llm_calls": [
+          8,
+          22
+        ],
+        "errors": [
+          4,
+          2
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "Basque Country",
+          "United Kingdom"
+        ],
+        "expected": "Guatemala"
+      },
+      "gemma": {
+        "level": "1",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          160761,
+          81234
+        ],
+        "runtimes": [
+          216,
+          139
+        ],
+        "llm_calls": [
+          27,
+          28
+        ],
+        "errors": [
+          1,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "Japan",
+          "Cannot be determined from the provided text**"
+        ],
+        "expected": "Guatemala"
+      }
+    },
+    "7673d772": {
+      "glm": {
+        "level": "1",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          0
+        ],
+        "runtimes": [
+          728,
+          707
+        ],
+        "llm_calls": [
+          0,
+          0
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          null
+        ],
+        "expected": "inference"
+      },
+      "gemma": {
+        "level": "1",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          114074,
+          91384
+        ],
+        "runtimes": [
+          155,
+          338
+        ],
+        "llm_calls": [
+          26,
+          27
+        ],
+        "errors": [
+          0,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "competency",
+          "competent"
+        ],
+        "expected": "inference"
+      }
+    },
+    "8b3379c0": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          61371,
+          143101
+        ],
+        "runtimes": [
+          407,
+          694
+        ],
+        "llm_calls": [
+          12,
+          28
+        ],
+        "errors": [
+          2,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "0",
+          "0.9"
+        ],
+        "expected": "1.8"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          80418,
+          77335
+        ],
+        "runtimes": [
+          137,
+          133
+        ],
+        "llm_calls": [
+          28,
+          28
+        ],
+        "errors": [
+          5,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "13"
+        ],
+        "expected": "1.8"
+      }
+    },
+    "ad2b4d70": {
+      "glm": {
+        "level": "3",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          162324,
+          105071
+        ],
+        "runtimes": [
+          693,
+          481
+        ],
+        "llm_calls": [
+          25,
+          19
+        ],
+        "errors": [
+          7,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "D"
+        ],
+        "expected": "War is not here this is a land of peace"
+      },
+      "gemma": {
+        "level": "3",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          89795,
+          94294
+        ],
+        "runtimes": [
+          137,
+          151
+        ],
+        "llm_calls": [
+          28,
+          29
+        ],
+        "errors": [
+          1,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "crescent",
+          "Moon"
+        ],
+        "expected": "War is not here this is a land of peace"
+      }
+    },
+    "bfcd99e1": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          64443
+        ],
+        "runtimes": [
+          462,
+          272
+        ],
+        "llm_calls": [
+          0,
+          13
+        ],
+        "errors": [
+          0,
+          2
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "13"
+        ],
+        "expected": "17"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          88057
+        ],
+        "runtimes": [
+          14,
+          140
+        ],
+        "llm_calls": [
+          0,
+          10
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "18"
+        ],
+        "expected": "17"
+      }
+    },
+    "d8152ad6": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          0
+        ],
+        "runtimes": [
+          732,
+          732
+        ],
+        "llm_calls": [
+          0,
+          0
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          null
+        ],
+        "expected": "0.03"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          63769,
+          62960
+        ],
+        "runtimes": [
+          97,
+          90
+        ],
+        "llm_calls": [
+          22,
+          25
+        ],
+        "errors": [
+          4,
+          4
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "0.02",
+          "0.02"
+        ],
+        "expected": "0.03"
+      }
+    },
+    "dc28cf18": {
+      "glm": {
+        "level": "1",
+        "results": [
+          "FAIL",
+          "PASS"
+        ],
+        "tokens": [
+          86145,
+          109845
+        ],
+        "runtimes": [
+          658,
+          721
+        ],
+        "llm_calls": [
+          8,
+          12
+        ],
+        "errors": [
+          1,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "2"
+        ],
+        "expected": "2"
+      },
+      "gemma": {
+        "level": "1",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          22164,
+          23903
+        ],
+        "runtimes": [
+          37,
+          55
+        ],
+        "llm_calls": [
+          8,
+          6
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "2",
+          "2"
+        ],
+        "expected": "2"
+      }
+    },
+    "e961a717": {
+      "glm": {
+        "level": "3",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          129363,
+          159429
+        ],
+        "runtimes": [
+          461,
+          685
+        ],
+        "llm_calls": [
+          26,
+          28
+        ],
+        "errors": [
+          1,
+          1
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "10",
+          null
+        ],
+        "expected": "12"
+      },
+      "gemma": {
+        "level": "3",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          176210,
+          80012
+        ],
+        "runtimes": [
+          159,
+          93
+        ],
+        "llm_calls": [
+          31,
+          14
+        ],
+        "errors": [
+          1,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "12",
+          "12"
+        ],
+        "expected": "12"
+      }
+    },
+    "e9a2c537": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          0,
+          56855
+        ],
+        "runtimes": [
+          929,
+          282
+        ],
+        "llm_calls": [
+          0,
+          12
+        ],
+        "errors": [
+          0,
+          4
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "6"
+        ],
+        "expected": "7"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          15924,
+          15783
+        ],
+        "runtimes": [
+          22,
+          23
+        ],
+        "llm_calls": [
+          8,
+          8
+        ],
+        "errors": [
+          0,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "7",
+          "7"
+        ],
+        "expected": "7"
+      }
+    },
+    "f2feb6a4": {
+      "glm": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          85868,
+          139244
+        ],
+        "runtimes": [
+          464,
+          681
+        ],
+        "llm_calls": [
+          19,
+          27
+        ],
+        "errors": [
+          4,
+          4
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          null,
+          "860000"
+        ],
+        "expected": "900000"
+      },
+      "gemma": {
+        "level": "2",
+        "results": [
+          "FAIL",
+          "FAIL"
+        ],
+        "tokens": [
+          78652,
+          83117
+        ],
+        "runtimes": [
+          132,
+          134
+        ],
+        "llm_calls": [
+          27,
+          27
+        ],
+        "errors": [
+          2,
+          0
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "1190000",
+          "1050000"
+        ],
+        "expected": "900000"
+      }
+    },
+    "f918266a": {
+      "glm": {
+        "level": "1",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          91867,
+          50955
+        ],
+        "runtimes": [
+          411,
+          290
+        ],
+        "llm_calls": [
+          23,
+          11
+        ],
+        "errors": [
+          9,
+          6
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "0",
+          "0"
+        ],
+        "expected": "0"
+      },
+      "gemma": {
+        "level": "1",
+        "results": [
+          "PASS",
+          "PASS"
+        ],
+        "tokens": [
+          13895,
+          10318
+        ],
+        "runtimes": [
+          33,
+          22
+        ],
+        "llm_calls": [
+          8,
+          7
+        ],
+        "errors": [
+          3,
+          3
+        ],
+        "tool_calls": [
+          0,
+          0
+        ],
+        "final_answers": [
+          "0",
+          "0"
+        ],
+        "expected": "0"
+      }
+    }
+  },
+  "scores": {
+    "GLM": {
+      "accuracy": 15.6,
+      "extraction": 62.5,
+      "stability_raw": 1206,
+      "token_eff_raw": 94966.0,
+      "speed_raw": 5.7,
+      "repeatability": 93.8,
+      "cost_raw": 607780.0,
+      "stability_raw_norm": 0,
+      "token_eff_raw_norm": 0,
+      "speed_raw_norm": 0,
+      "cost_raw_norm": 0,
+      "composite": 23.4
+    },
+    "Gemma": {
+      "accuracy": 34.4,
+      "extraction": 90.6,
+      "stability_raw": 1139,
+      "token_eff_raw": 68002.0,
+      "speed_raw": 32.3,
+      "repeatability": 93.8,
+      "cost_raw": 197824.0,
+      "stability_raw_norm": 100,
+      "token_eff_raw_norm": 100,
+      "speed_raw_norm": 100,
+      "cost_raw_norm": 100,
+      "composite": 78.3
+    }
+  }
+}
